@@ -1,0 +1,47 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Stores user-specific settings and profile information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Unique identifier for the user." },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Listing": {
+      "title": "Product Listing",
+      "description": "AI-generated product listing data.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "uid": { "type": "string", "description": "Owner of the listing." },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "bullet_points": { "type": "array", "items": { "type": "string" } },
+        "keywords": { "type": "array", "items": { "type": "string" } },
+        "price": { "type": "string", "description": "Price in INR." },
+        "category": { "type": "string" },
+        "model_compatibility": { "type": "string", "description": "Compatible phone model (if applicable)." },
+        "color": { "type": "string", "description": "Product color." },
+        "image_url": { "type": "string" },
+        "created_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "title", "description", "price", "category"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": {
+      "schema": "UserProfile",
+      "description": "User profile documents."
+    },
+    "/users/{uid}/listings/{listingId}": {
+      "schema": "Listing",
+      "description": "User-specific product listings."
+    }
+  }
+}

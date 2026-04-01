@@ -1,0 +1,5 @@
+{
+  "name": "SnapList AI",
+  "description": "AI-powered ecommerce listing automation system. Generate product listings from photos and autofill them on seller dashboards.",
+  "requestFramePermissions": ["camera", "microphone"]
+}

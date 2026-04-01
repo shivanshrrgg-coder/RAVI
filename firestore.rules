@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {uid}
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required)
+    //   - displayName: string
+    //   - photoURL: string
+    //   - createdAt: timestamp
+    //
+    // Collection: users/{uid}/listings
+    // Document ID: {listingId}
+    // Fields:
+    //   - uid: string (required)
+    //   - title: string (required)
+    //   - description: string (required)
+    //   - bullet_points: list (strings)
+    //   - keywords: list (strings)
+    //   - price: string (required)
+    //   - category: string (required)
+    //   - image_url: string
+    //   - created_at: timestamp
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string &&
+             data.email is string;
+    }
+
+    function isValidListing(data) {
+      return data.keys().hasAll(['uid', 'title', 'description', 'price', 'category']) &&
+             data.uid is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 5000 &&
+             data.price is string &&
+             data.category is string &&
+             (!('model_compatibility' in data) || data.model_compatibility is string) &&
+             (!('color' in data) || data.color is string);
+    }
+
+    // User Profile Rules
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data);
+      
+      // Listings Subcollection
+      match /listings/{listingId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidListing(request.resource.data);
+        allow update: if isOwner(userId) && isValidListing(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
